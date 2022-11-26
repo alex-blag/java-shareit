@@ -9,6 +9,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static ru.practicum.shareit.common.CommonUtils.isStringNotBlank;
+
 @Repository
 public class ItemRepositoryInMapImpl implements ItemRepository {
 
@@ -23,11 +25,11 @@ public class ItemRepositoryInMapImpl implements ItemRepository {
 
     @Override
     public Item create(Item obj) {
-        long itemId = generateItemId();
+        long itemId = generateId();
         obj.setId(itemId);
         idToItem.put(itemId, obj);
 
-        return idToItem.get(itemId);
+        return obj;
     }
 
     @Override
@@ -42,16 +44,15 @@ public class ItemRepositoryInMapImpl implements ItemRepository {
 
     @Override
     public Item update(Item obj) {
-        long itemId = obj.getId();
-        Item item = new Item(idToItem.get(itemId));
+        Item item = idToItem.get(obj.getId());
 
         String newName = obj.getName();
-        if (newName != null) {
+        if (isStringNotBlank(newName)) {
             item.setName(newName);
         }
 
         String newDescription = obj.getDescription();
-        if (newDescription != null) {
+        if (isStringNotBlank(newDescription)) {
             item.setDescription(newDescription);
         }
 
@@ -60,9 +61,7 @@ public class ItemRepositoryInMapImpl implements ItemRepository {
             item.setAvailable(newAvailable);
         }
 
-        idToItem.put(itemId, item);
-
-        return idToItem.get(itemId);
+        return item;
     }
 
     @Override
@@ -70,7 +69,7 @@ public class ItemRepositoryInMapImpl implements ItemRepository {
         throw new UnsupportedOperationException();
     }
 
-    private long generateItemId() {
+    private long generateId() {
         return id++;
     }
 
@@ -84,20 +83,12 @@ public class ItemRepositoryInMapImpl implements ItemRepository {
 
     @Override
     public List<Item> findAllBySearchText(String text) {
-        List<Item> items;
-
-        if (text.isBlank()) {
-            items = List.of();
-        } else {
-            String lowerText = text.toLowerCase();
-            items = idToItem.values().stream()
-                    .filter(Item::getAvailable)
-                    .filter(item -> isTextContainsInNameOrDescription(lowerText, item))
-                    .collect(Collectors
-                            .toList());
-        }
-
-        return items;
+        String lowerText = text.toLowerCase();
+        return idToItem.values().stream()
+                .filter(Item::getAvailable)
+                .filter(item -> isTextContainsInNameOrDescription(lowerText, item))
+                .collect(Collectors
+                        .toList());
     }
 
     private boolean isTextContainsInNameOrDescription(String text, Item item) {

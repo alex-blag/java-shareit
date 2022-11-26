@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import static ru.practicum.shareit.common.CommonUtils.isStringNotBlank;
+
 @Repository
 public class UserRepositoryInMapImpl implements UserRepository {
 
@@ -24,13 +26,13 @@ public class UserRepositoryInMapImpl implements UserRepository {
 
     @Override
     public User create(User obj) {
-        checkEmailExistence(obj.getEmail());
+        checkUserEmailExistence(obj.getId(), obj.getEmail());
 
-        long userId = generateUserId();
+        long userId = generateId();
         obj.setId(userId);
         idToUser.put(userId, obj);
 
-        return idToUser.get(userId);
+        return obj;
     }
 
     @Override
@@ -46,22 +48,20 @@ public class UserRepositoryInMapImpl implements UserRepository {
     @Override
     public User update(User obj) {
         long userId = obj.getId();
-        User user = new User(idToUser.get(userId));
+        User user = idToUser.get(userId);
 
         String newName = obj.getName();
-        if (newName != null) {
+        if (isStringNotBlank(newName)) {
             user.setName(newName);
         }
 
         String newEmail = obj.getEmail();
-        if (newEmail != null) {
-            checkEmailExistence(newEmail);
+        if (isStringNotBlank(newEmail)) {
+            checkUserEmailExistence(userId, newEmail);
             user.setEmail(newEmail);
         }
 
-        idToUser.put(userId, user);
-
-        return idToUser.get(userId);
+        return user;
     }
 
     @Override
@@ -69,19 +69,21 @@ public class UserRepositoryInMapImpl implements UserRepository {
         idToUser.remove(id);
     }
 
-    private void checkEmailExistence(String email) throws EmailAlreadyExistsException {
-        if (isEmailAlreadyExists(email)) {
+    private void checkUserEmailExistence(Long userId, String email) {
+        if (isUserEmailAlreadyExists(userId, email)) {
             throw new EmailAlreadyExistsException();
         }
     }
 
-    private boolean isEmailAlreadyExists(String email) {
+    private boolean isUserEmailAlreadyExists(Long userId, String email) {
         return idToUser.values().stream()
-                .map(User::getEmail)
-                .anyMatch(em -> em.equals(email));
+                .anyMatch(user
+                        -> user.getEmail().equals(email)
+                        && !user.getId().equals(userId)
+                );
     }
 
-    private long generateUserId() {
+    private long generateId() {
         return id++;
     }
 

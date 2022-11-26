@@ -16,6 +16,8 @@ import ru.practicum.shareit.item.model.Item;
 import javax.validation.Valid;
 import java.util.List;
 
+import static ru.practicum.shareit.common.CommonUtils.isStringNotBlank;
+
 @RestController
 @RequestMapping("/items")
 @RequiredArgsConstructor
@@ -26,7 +28,7 @@ public class ItemController {
     private final ItemService itemService;
 
     @PostMapping
-    public ItemDto postItem(
+    public ItemDto post(
             @RequestHeader(X_SHARER_USER_ID) long userId,
             @Valid @RequestBody ItemDto itemDto
     ) {
@@ -36,31 +38,15 @@ public class ItemController {
     }
 
     @GetMapping("/{itemId}")
-    public ItemDto getItem(
+    public ItemDto get(
             @PathVariable long itemId
     ) {
         Item found = itemService.find(itemId);
         return toItemDto(found);
     }
 
-    @GetMapping
-    public List<ItemDto> getAllUserItems(
-            @RequestHeader(X_SHARER_USER_ID) long userId
-    ) {
-        List<Item> found = itemService.findAllByUserId(userId);
-        return toItemsDto(found);
-    }
-
-    @GetMapping("/search")
-    public List<ItemDto> getItemsBySearchText(
-            @RequestParam String text
-    ) {
-        List<Item> items = itemService.findAllBySearchText(text);
-        return toItemsDto(items);
-    }
-
     @PatchMapping("/{itemId}")
-    public ItemDto patchItem(
+    public ItemDto patch(
             @PathVariable long itemId,
             @RequestHeader(X_SHARER_USER_ID) long userId,
             @RequestBody ItemDto itemDto
@@ -69,6 +55,22 @@ public class ItemController {
         itemDto.setOwner(userId);
         Item changed = itemService.change(toItem(itemDto));
         return toItemDto(changed);
+    }
+
+    @GetMapping
+    public List<ItemDto> getAllByUserId(
+            @RequestHeader(X_SHARER_USER_ID) long userId
+    ) {
+        List<Item> found = itemService.findAllByUserId(userId);
+        return toItemsDto(found);
+    }
+
+    @GetMapping("/search")
+    public List<ItemDto> getAllBySearchText(
+            @RequestParam String text
+    ) {
+        List<Item> found = findAllBySearchText(text);
+        return toItemsDto(found);
     }
 
     private Item toItem(ItemDto itemDto) {
@@ -81,6 +83,12 @@ public class ItemController {
 
     private List<ItemDto> toItemsDto(List<Item> items) {
         return ItemMapper.toItemsDto(items);
+    }
+
+    private List<Item> findAllBySearchText(String text) {
+        return isStringNotBlank(text)
+                ? itemService.findAllBySearchText(text)
+                : List.of();
     }
 
 }
