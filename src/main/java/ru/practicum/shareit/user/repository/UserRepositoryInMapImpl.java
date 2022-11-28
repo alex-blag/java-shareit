@@ -1,7 +1,7 @@
-package ru.practicum.shareit.user;
+package ru.practicum.shareit.user.repository;
 
 import org.springframework.stereotype.Repository;
-import ru.practicum.shareit.exception.EmailAlreadyExistsException;
+import ru.practicum.shareit.exception.ExceptionUtils;
 import ru.practicum.shareit.user.model.User;
 
 import java.util.ArrayList;
@@ -71,7 +71,7 @@ public class UserRepositoryInMapImpl implements UserRepository {
 
     private void checkUserEmailExistence(Long userId, String email) {
         if (isUserEmailAlreadyExists(userId, email)) {
-            throw new EmailAlreadyExistsException();
+            throw ExceptionUtils.getEmailAlreadyExistsException(email);
         }
     }
 

@@ -1,6 +1,7 @@
 package ru.practicum.shareit.item.dto;
 
 import lombok.Data;
+import ru.practicum.shareit.common.Post;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
@@ -10,13 +11,13 @@ public class ItemDto {
 
     private Long id;
 
-    @NotBlank
+    @NotBlank(groups = Post.class)
     private String name;
 
-    @NotBlank
+    @NotBlank(groups = Post.class)
     private String description;
 
-    @NotNull
+    @NotNull(groups = Post.class)
     private Boolean available;
 
     private Long owner;

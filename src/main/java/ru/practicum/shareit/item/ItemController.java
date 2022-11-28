@@ -1,6 +1,7 @@
 package ru.practicum.shareit.item;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -10,10 +11,12 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import ru.practicum.shareit.common.Patch;
+import ru.practicum.shareit.common.Post;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.item.service.ItemService;
 
-import javax.validation.Valid;
 import java.util.List;
 
 import static ru.practicum.shareit.common.CommonUtils.isStringNotBlank;
@@ -30,7 +33,7 @@ public class ItemController {
     @PostMapping
     public ItemDto post(
             @RequestHeader(X_SHARER_USER_ID) long userId,
-            @Valid @RequestBody ItemDto itemDto
+            @Validated(Post.class) @RequestBody ItemDto itemDto
     ) {
         itemDto.setOwner(userId);
         Item added = itemService.add(toItem(itemDto));
@@ -49,7 +52,7 @@ public class ItemController {
     public ItemDto patch(
             @PathVariable long itemId,
             @RequestHeader(X_SHARER_USER_ID) long userId,
-            @RequestBody ItemDto itemDto
+            @Validated(Patch.class) @RequestBody ItemDto itemDto
     ) {
         itemDto.setId(itemId);
         itemDto.setOwner(userId);

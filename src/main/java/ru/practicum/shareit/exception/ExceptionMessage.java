@@ -1,4 +1,4 @@
-package ru.practicum.shareit.common;
+package ru.practicum.shareit.exception;
 
 public class ExceptionMessage {
 
@@ -7,5 +7,7 @@ public class ExceptionMessage {
     public static final String EMAIL_ALREADY_EXISTS = "Email already exists";
 
     public static final String USER_NOT_OWN_ITEM = "User not own item";
+
+    public static final String ITEM_NOT_FOUND = "Item not found";
 
 }

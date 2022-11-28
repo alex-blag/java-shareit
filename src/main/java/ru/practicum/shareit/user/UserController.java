@@ -14,6 +14,7 @@ import ru.practicum.shareit.common.Patch;
 import ru.practicum.shareit.common.Post;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
+import ru.practicum.shareit.user.service.UserService;
 
 import java.util.List;
 

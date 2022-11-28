@@ -1,11 +1,11 @@
-package ru.practicum.shareit.item;
+package ru.practicum.shareit.item.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import ru.practicum.shareit.exception.ItemNotFoundException;
-import ru.practicum.shareit.exception.UserNotOwnItemException;
+import ru.practicum.shareit.exception.ExceptionUtils;
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.user.UserService;
+import ru.practicum.shareit.item.repository.ItemRepository;
+import ru.practicum.shareit.user.service.UserService;
 
 import java.util.List;
 
@@ -32,7 +32,7 @@ public class ItemServiceImpl implements ItemService {
     public Item find(long id) {
         return itemRepository
                 .read(id)
-                .orElseThrow(ItemNotFoundException::new);
+                .orElseThrow(() -> ExceptionUtils.getItemNotFoundException(id));
     }
 
     @Override
@@ -41,7 +41,7 @@ public class ItemServiceImpl implements ItemService {
         long userId = obj.getOwner();
         userService.find(userId);
         if (userId != find(itemId).getOwner()) {
-            throw new UserNotOwnItemException();
+            throw ExceptionUtils.getUserNotOwnItemException(userId, itemId);
         }
         return itemRepository.update(obj);
     }
