@@ -2,30 +2,58 @@ package ru.practicum.shareit.item.model;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import ru.practicum.shareit.booking.model.BookingNext;
 
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Table;
+import javax.persistence.Transient;
+import java.util.List;
+
+@Entity
+@Table(name = "items")
 @Data
 @NoArgsConstructor
 public class Item {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(length = 100, nullable = false)
     private String name;
 
+    @Column(length = 200, nullable = false)
     private String description;
 
+    @Column(nullable = false)
     private Boolean available;
 
-    private Long owner;
+    @Column(name = "owner_id", nullable = false)
+    private Long ownerId;
 
-    private Long request;
+    @Column(name = "request_id")
+    private Long requestId;
+
+    @Transient
+    private BookingNext lastBooking;
+
+    @Transient
+    private BookingNext nextBooking;
+
+    @Transient
+    private List<Comment> comments;
 
     public Item(Item item) {
         this.id = item.getId();
         this.name = item.getName();
         this.description = item.getDescription();
         this.available = item.getAvailable();
-        this.owner = item.getOwner();
-        this.request = item.getRequest();
+        this.ownerId = item.getOwnerId();
+        this.requestId = item.getRequestId();
     }
 
 }
