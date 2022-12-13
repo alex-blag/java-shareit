@@ -3,7 +3,7 @@ package ru.practicum.shareit.item.dto;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import ru.practicum.shareit.booking.dto.BookingMapper;
-import ru.practicum.shareit.booking.model.BookingNext;
+import ru.practicum.shareit.booking.model.BookingNearest;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 
@@ -24,14 +24,14 @@ public class ItemMapper {
         itemDto.setOwner(item.getOwnerId());
         itemDto.setRequest(item.getRequestId());
 
-        BookingNext lastBooking = item.getLastBooking();
+        BookingNearest lastBooking = item.getLastBooking();
         if (lastBooking != null) {
-            itemDto.setLastBooking(BookingMapper.toBookingNextDto(lastBooking));
+            itemDto.setLastBooking(BookingMapper.toBookingNearestDto(lastBooking));
         }
 
-        BookingNext nextBooking = item.getNextBooking();
+        BookingNearest nextBooking = item.getNextBooking();
         if (nextBooking != null) {
-            itemDto.setNextBooking(BookingMapper.toBookingNextDto(nextBooking));
+            itemDto.setNextBooking(BookingMapper.toBookingNearestDto(nextBooking));
         }
 
         List<Comment> comments = item.getComments() != null

@@ -141,7 +141,7 @@ public class BookingServiceImpl implements BookingService {
     public List<Booking> findAllByOwnerIdAndState(long ownerId, State state, Sort sort) {
         userExistsOrThrow(ownerId);
 
-        List<Long> itemIds = itemService.findAllByOwnerId(ownerId, sort).stream()
+        List<Long> itemIds = itemService.findAllByOwnerId(ownerId).stream()
                 .map(Item::getId)
                 .collect(Collectors
                         .toList());
@@ -191,11 +191,6 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public List<Booking> findAllByItemIdIn(List<Long> itemIds, Sort sort) {
-        return bookingRepository.findAllByItemIdIn(itemIds, sort);
-    }
-
-    @Override
     public List<Booking> findAllByBookerIdAndItemIdAndEndBeforeAndStatus(
             long bookerId,
             long itemId,
@@ -210,6 +205,26 @@ public class BookingServiceImpl implements BookingService {
                 status,
                 sort
         );
+    }
+
+    @Override
+    public List<Booking> findDistinctByItemIdInAndEndIsBeforeAndStatus(
+            List<Long> itemIds,
+            LocalDateTime end,
+            Status status,
+            Sort sort
+    ) {
+        return bookingRepository.findDistinctByItemIdInAndEndIsBeforeAndStatus(itemIds, end, status, sort);
+    }
+
+    @Override
+    public List<Booking> findDistinctByItemIdInAndStartIsAfterAndStatus(
+            List<Long> itemIds,
+            LocalDateTime start,
+            Status status,
+            Sort sort
+    ) {
+        return bookingRepository.findDistinctByItemIdInAndStartIsAfterAndStatus(itemIds, start, status, sort);
     }
 
     private void userExistsOrThrow(long userId) {

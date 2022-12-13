@@ -2,16 +2,17 @@ package ru.practicum.shareit.item.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.model.Booking;
-import ru.practicum.shareit.booking.model.BookingNext;
+import ru.practicum.shareit.booking.model.BookingNearest;
+import ru.practicum.shareit.booking.model.BookingSort;
 import ru.practicum.shareit.booking.model.Status;
 import ru.practicum.shareit.booking.service.BookingService;
 import ru.practicum.shareit.common.CommonUtils;
 import ru.practicum.shareit.exception.ExceptionUtils;
 import ru.practicum.shareit.item.model.Comment;
+import ru.practicum.shareit.item.model.CommentSort;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.CommentRepository;
 import ru.practicum.shareit.item.repository.ItemRepository;
@@ -24,7 +25,6 @@ import java.util.Map;
 
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toList;
-import static ru.practicum.shareit.booking.model.BookingSortBy.SORT_BY_START_DESC;
 
 @Transactional(readOnly = true)
 @Service
@@ -94,7 +94,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public List<Item> findAllByOwnerId(long ownerId, Sort sort) {
+    public List<Item> findAllByOwnerId(long ownerId) {
         userExistsOrThrow(ownerId);
 
         List<Item> items = itemRepository.findAllByOwnerId(ownerId);
@@ -103,13 +103,37 @@ public class ItemServiceImpl implements ItemService {
                 .map(Item::getId)
                 .collect(toList());
 
-        Map<Item, List<Booking>> itemToBookings = bookingService
-                .findAllByItemIdIn(itemIds, sort)
+        Map<Item, List<Booking>> itemToLastBookings = bookingService.findDistinctByItemIdInAndEndIsBeforeAndStatus(
+                        itemIds,
+                        LocalDateTime.now(),
+                        Status.APPROVED,
+                        BookingSort.BY_END_DESC)
                 .stream()
                 .collect(groupingBy(Booking::getItem, toList()));
 
+        Map<Item, List<Booking>> itemToNextBookings = bookingService.findDistinctByItemIdInAndStartIsAfterAndStatus(
+                        itemIds,
+                        LocalDateTime.now(),
+                        Status.APPROVED,
+                        BookingSort.BY_START_ASC)
+                .stream()
+                .collect(groupingBy(Booking::getItem, toList()));
+
+        Map<Item, List<Comment>> itemToComments = commentRepository
+                .findAllByItemIdIn(itemIds, CommentSort.BY_CREATED_DESC)
+                .stream()
+                .collect(groupingBy(Comment::getItem, toList()));
+
         items.forEach(
-                item -> appendLastAndNextBookingToItem(ownerId, item, itemToBookings.getOrDefault(item, List.of()))
+                item -> {
+                    List<Booking> lastBookings = itemToLastBookings.getOrDefault(item, List.of());
+                    item.setLastBooking(getBookingNearest(ownerId, lastBookings));
+
+                    List<Booking> nextBookings = itemToNextBookings.getOrDefault(item, List.of());
+                    item.setNextBooking(getBookingNearest(ownerId, nextBookings));
+
+                    item.setComments(itemToComments.getOrDefault(item, List.of()));
+                }
         );
 
         return items;
@@ -125,8 +149,25 @@ public class ItemServiceImpl implements ItemService {
         userExistsOrThrow(userId);
         Item item = findById(itemId);
 
-        List<Booking> bookings = bookingService.findAllByItemIdIn(List.of(item.getId()), SORT_BY_START_DESC);
-        appendLastAndNextBookingToItem(userId, item, bookings);
+        List<Booking> lastBookings = bookingService.findDistinctByItemIdInAndEndIsBeforeAndStatus(
+                List.of(item.getId()),
+                LocalDateTime.now(),
+                Status.APPROVED,
+                BookingSort.BY_END_DESC
+        );
+
+        BookingNearest lastBooking = getBookingNearest(userId, lastBookings);
+        item.setLastBooking(lastBooking);
+
+        List<Booking> nextBookings = bookingService.findDistinctByItemIdInAndStartIsAfterAndStatus(
+                List.of(item.getId()),
+                LocalDateTime.now(),
+                Status.APPROVED,
+                BookingSort.BY_START_ASC
+        );
+
+        BookingNearest nextBooking = getBookingNearest(userId, nextBookings);
+        item.setNextBooking(nextBooking);
 
         List<Comment> comments = commentRepository.findAllByItemId(itemId);
         item.setComments(comments);
@@ -150,7 +191,7 @@ public class ItemServiceImpl implements ItemService {
                 itemId,
                 LocalDateTime.now(),
                 Status.APPROVED,
-                SORT_BY_START_DESC
+                BookingSort.BY_START_DESC
         );
 
         if (bookings.isEmpty()) {
@@ -161,40 +202,29 @@ public class ItemServiceImpl implements ItemService {
         return commentRepository.save(comment);
     }
 
-    private void appendLastAndNextBookingToItem(long userId, Item item, List<Booking> bookings) {
-        BookingNext lastBooking = getLastBooking(bookings);
-        if (lastBooking != null && userId != lastBooking.getBookerId()) {
-            item.setNextBooking(lastBooking);
+    private BookingNearest getBookingNearest(long userId, List<Booking> bookings) {
+        if (bookings.isEmpty()) {
+            return null;
         }
 
-        BookingNext nextBooking = getNextBooking(bookings);
-        if (nextBooking != null && userId != nextBooking.getBookerId()) {
-            item.setLastBooking(nextBooking);
-        }
-    }
-
-    private BookingNext getLastBooking(List<Booking> bookings) {
-        return buildBookingNext(bookings, 1);
-    }
-
-    private BookingNext getNextBooking(List<Booking> bookings) {
-        return buildBookingNext(bookings, 2);
-    }
-
-    private BookingNext buildBookingNext(List<Booking> bookings, int bookingNumber) {
-        BookingNext bookingNext = null;
-
-        if (bookings.size() >= bookingNumber) {
-            Booking booking = bookings.get(bookingNumber - 1);
-
-            bookingNext = new BookingNext();
-            bookingNext.setId(booking.getId());
-            bookingNext.setBookerId(booking.getBooker().getId());
-            bookingNext.setStart(booking.getStart());
-            bookingNext.setEnd(booking.getEnd());
+        Booking booking = bookings.get(0);
+        if (userId == booking.getBooker().getId()) {
+            return null;
         }
 
-        return bookingNext;
+        return toBookingNearest(booking);
+    }
+
+    private BookingNearest toBookingNearest(Booking booking) {
+        BookingNearest bookingNearest = null;
+        if (booking != null) {
+            bookingNearest = new BookingNearest();
+            bookingNearest.setId(booking.getId());
+            bookingNearest.setBookerId(booking.getBooker().getId());
+            bookingNearest.setStart(booking.getStart());
+            bookingNearest.setEnd(booking.getEnd());
+        }
+        return bookingNearest;
     }
 
     private void userExistsOrThrow(long userId) {

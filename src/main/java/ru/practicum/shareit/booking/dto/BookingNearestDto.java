@@ -1,11 +1,11 @@
-package ru.practicum.shareit.booking.model;
+package ru.practicum.shareit.booking.dto;
 
 import lombok.Data;
 
 import java.time.LocalDateTime;
 
 @Data
-public class BookingNext {
+public class BookingNearestDto {
 
     private Long id;
 

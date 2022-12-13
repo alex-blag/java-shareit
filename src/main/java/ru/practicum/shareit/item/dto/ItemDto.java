@@ -1,7 +1,7 @@
 package ru.practicum.shareit.item.dto;
 
 import lombok.Data;
-import ru.practicum.shareit.booking.dto.BookingNextDto;
+import ru.practicum.shareit.booking.dto.BookingNearestDto;
 import ru.practicum.shareit.common.validation.Post;
 
 import javax.validation.constraints.NotBlank;
@@ -26,9 +26,9 @@ public class ItemDto {
 
     private Long request;
 
-    private BookingNextDto lastBooking;
+    private BookingNearestDto lastBooking;
 
-    private BookingNextDto nextBooking;
+    private BookingNearestDto nextBooking;
 
     private List<CommentDto> comments;
 

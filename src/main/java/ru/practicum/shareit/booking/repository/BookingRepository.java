@@ -12,9 +12,9 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
 
     List<Booking> findAllByBookerId(long bookerId, Sort sort);
 
-    List<Booking> findAllByBookerIdAndStartAfter(long bookerId, LocalDateTime start, Sort sort);
-
     List<Booking> findAllByBookerIdAndStatus(long bookerId, Status status, Sort sort);
+
+    List<Booking> findAllByBookerIdAndStartAfter(long bookerId, LocalDateTime start, Sort sort);
 
     List<Booking> findAllByBookerIdAndStartBeforeAndEndAfter(
             long bookerId,
@@ -25,11 +25,19 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
 
     List<Booking> findAllByBookerIdAndEndBeforeAndStatus(long bookerId, LocalDateTime end, Status status, Sort sort);
 
+    List<Booking> findAllByBookerIdAndItemIdAndEndBeforeAndStatus(
+            long bookerId,
+            long itemId,
+            LocalDateTime end,
+            Status status,
+            Sort sort
+    );
+
     List<Booking> findAllByItemIdIn(List<Long> itemIds, Sort sort);
 
-    List<Booking> findAllByItemIdInAndStartAfter(List<Long> itemIds, LocalDateTime start, Sort sort);
-
     List<Booking> findAllByItemIdInAndStatus(List<Long> itemIds, Status status, Sort sort);
+
+    List<Booking> findAllByItemIdInAndStartAfter(List<Long> itemIds, LocalDateTime start, Sort sort);
 
     List<Booking> findAllByItemIdInAndStartBeforeAndEndAfter(
             List<Long> itemIds,
@@ -45,10 +53,16 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             Sort sort
     );
 
-    List<Booking> findAllByBookerIdAndItemIdAndEndBeforeAndStatus(
-            long bookerId,
-            long itemId,
+    List<Booking> findDistinctByItemIdInAndEndIsBeforeAndStatus(
+            List<Long> itemIds,
             LocalDateTime end,
+            Status status,
+            Sort sort
+    );
+
+    List<Booking> findDistinctByItemIdInAndStartIsAfterAndStatus(
+            List<Long> itemIds,
+            LocalDateTime start,
             Status status,
             Sort sort
     );

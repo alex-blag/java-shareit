@@ -3,7 +3,7 @@ package ru.practicum.shareit.item.model;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import ru.practicum.shareit.booking.model.BookingNext;
+import ru.practicum.shareit.booking.model.BookingNearest;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -41,10 +41,10 @@ public class Item {
     private Long requestId;
 
     @Transient
-    private BookingNext lastBooking;
+    private BookingNearest lastBooking;
 
     @Transient
-    private BookingNext nextBooking;
+    private BookingNearest nextBooking;
 
     @Transient
     private List<Comment> comments;

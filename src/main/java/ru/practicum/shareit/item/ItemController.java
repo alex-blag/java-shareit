@@ -25,7 +25,6 @@ import ru.practicum.shareit.item.service.ItemService;
 
 import java.util.List;
 
-import static ru.practicum.shareit.booking.model.BookingSortBy.SORT_BY_START_DESC;
 import static ru.practicum.shareit.common.CommonUtils.X_SHARER_USER_ID;
 
 @RestController
@@ -70,7 +69,7 @@ public class ItemController {
     public List<ItemDto> getAllByUserId(
             @RequestHeader(X_SHARER_USER_ID) long userId
     ) {
-        List<Item> items = itemService.findAllByOwnerId(userId, SORT_BY_START_DESC);
+        List<Item> items = itemService.findAllByOwnerId(userId);
         return toItemsDto(items);
     }
 

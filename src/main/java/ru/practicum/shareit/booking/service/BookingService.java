@@ -17,12 +17,24 @@ public interface BookingService extends Service<Booking> {
 
     List<Booking> findAllByOwnerIdAndState(long ownerId, State state, Sort sort);
 
-    List<Booking> findAllByItemIdIn(List<Long> itemIds, Sort sort);
-
     List<Booking> findAllByBookerIdAndItemIdAndEndBeforeAndStatus(
             long bookerId,
             long itemId,
             LocalDateTime end,
+            Status status,
+            Sort sort
+    );
+
+    List<Booking> findDistinctByItemIdInAndEndIsBeforeAndStatus(
+            List<Long> itemIds,
+            LocalDateTime end,
+            Status status,
+            Sort sort
+    );
+
+    List<Booking> findDistinctByItemIdInAndStartIsAfterAndStatus(
+            List<Long> itemIds,
+            LocalDateTime start,
             Status status,
             Sort sort
     );
