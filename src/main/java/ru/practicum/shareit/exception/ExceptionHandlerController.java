@@ -34,9 +34,9 @@ public class ExceptionHandlerController {
     }
 
     @ExceptionHandler
-    public ResponseEntity<String> handle(UserNotRelatedToBookingException e) {
+    public ResponseEntity<String> handle(UserNotRelatedWithBookingException e) {
         logError(e);
-        return getExceptionResponse(ExceptionMessage.USER_NOT_RELATED_TO_BOOKING, HttpStatus.NOT_FOUND);
+        return getExceptionResponse(ExceptionMessage.USER_NOT_RELATED_WITH_BOOKING, HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler

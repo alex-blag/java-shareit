@@ -1,7 +1,8 @@
 package ru.practicum.shareit.item.model;
 
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import ru.practicum.shareit.booking.model.BookingNext;
 
 import javax.persistence.Column;
@@ -15,8 +16,9 @@ import java.util.List;
 
 @Entity
 @Table(name = "items")
-@Data
 @NoArgsConstructor
+@Getter
+@Setter
 public class Item {
 
     @Id

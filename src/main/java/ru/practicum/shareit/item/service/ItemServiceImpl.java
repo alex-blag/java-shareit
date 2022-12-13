@@ -2,7 +2,9 @@ package ru.practicum.shareit.item.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.BookingNext;
 import ru.practicum.shareit.booking.model.Status;
@@ -18,7 +20,13 @@ import ru.practicum.shareit.user.service.UserService;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
+import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.toList;
+import static ru.practicum.shareit.booking.model.BookingSortBy.SORT_BY_START_DESC;
+
+@Transactional(readOnly = true)
 @Service
 @RequiredArgsConstructor
 public class ItemServiceImpl implements ItemService {
@@ -32,9 +40,10 @@ public class ItemServiceImpl implements ItemService {
 
     private final CommentRepository commentRepository;
 
+    @Transactional
     @Override
     public Item save(Item entity) {
-        checkIfUserExistsById(entity.getOwnerId());
+        userExistsOrThrow(entity.getOwnerId());
         return itemRepository.save(entity);
     }
 
@@ -50,15 +59,16 @@ public class ItemServiceImpl implements ItemService {
                 .orElseThrow(() -> ExceptionUtils.getItemNotFoundException(id));
     }
 
+    @Transactional
     @Override
     public Item update(Item entity) {
         long ownerId = entity.getOwnerId();
-        checkIfUserExistsById(ownerId);
+        userExistsOrThrow(ownerId);
 
         long itemId = entity.getId();
         Item item = findById(itemId);
 
-        checkUserOwnershipOfItem(ownerId, item);
+        userOwnsItemOrThrow(ownerId, item);
 
         String newName = entity.getName();
         if (CommonUtils.isStringNotBlank(newName)) {
@@ -75,7 +85,7 @@ public class ItemServiceImpl implements ItemService {
             item.setAvailable(newAvailable);
         }
 
-        return itemRepository.save(item);
+        return item;
     }
 
     @Override
@@ -84,11 +94,23 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public List<Item> findAllByOwnerId(long ownerId) {
-        checkIfUserExistsById(ownerId);
+    public List<Item> findAllByOwnerId(long ownerId, Sort sort) {
+        userExistsOrThrow(ownerId);
 
         List<Item> items = itemRepository.findAllByOwnerId(ownerId);
-        items.forEach(item -> addBookingNext(ownerId, item));
+        List<Long> itemIds = items
+                .stream()
+                .map(Item::getId)
+                .collect(toList());
+
+        Map<Item, List<Booking>> itemToBookings = bookingService
+                .findAllByItemIdIn(itemIds, sort)
+                .stream()
+                .collect(groupingBy(Booking::getItem, toList()));
+
+        items.forEach(
+                item -> appendLastAndNextBookingToItem(ownerId, item, itemToBookings.getOrDefault(item, List.of()))
+        );
 
         return items;
     }
@@ -100,9 +122,11 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public Item findByIdAndUserId(long itemId, long userId) {
-        checkIfUserExistsById(userId);
+        userExistsOrThrow(userId);
         Item item = findById(itemId);
-        addBookingNext(userId, item);
+
+        List<Booking> bookings = bookingService.findAllByItemIdIn(List.of(item.getId()), SORT_BY_START_DESC);
+        appendLastAndNextBookingToItem(userId, item, bookings);
 
         List<Comment> comments = commentRepository.findAllByItemId(itemId);
         item.setComments(comments);
@@ -110,6 +134,7 @@ public class ItemServiceImpl implements ItemService {
         return item;
     }
 
+    @Transactional
     @Override
     public Comment save(Comment comment) {
         long authorId = comment.getAuthor().getId();
@@ -120,11 +145,12 @@ public class ItemServiceImpl implements ItemService {
         Item item = findById(itemId);
         comment.setItem(item);
 
-        List<Booking> bookings = bookingService.findAllByEndBeforeAndItemIdAndBookerIdAndStatusOrderByStartDesc(
-                LocalDateTime.now(),
-                itemId,
+        List<Booking> bookings = bookingService.findAllByBookerIdAndItemIdAndEndBeforeAndStatus(
                 authorId,
-                Status.APPROVED
+                itemId,
+                LocalDateTime.now(),
+                Status.APPROVED,
+                SORT_BY_START_DESC
         );
 
         if (bookings.isEmpty()) {
@@ -135,9 +161,7 @@ public class ItemServiceImpl implements ItemService {
         return commentRepository.save(comment);
     }
 
-    private Item addBookingNext(long userId, Item item) {
-        List<Booking> bookings = bookingService.findAllByItemIdOrderByStartDesc(item.getId());
-
+    private void appendLastAndNextBookingToItem(long userId, Item item, List<Booking> bookings) {
         BookingNext lastBooking = getLastBooking(bookings);
         if (lastBooking != null && userId != lastBooking.getBookerId()) {
             item.setNextBooking(lastBooking);
@@ -147,8 +171,6 @@ public class ItemServiceImpl implements ItemService {
         if (nextBooking != null && userId != nextBooking.getBookerId()) {
             item.setLastBooking(nextBooking);
         }
-
-        return item;
     }
 
     private BookingNext getLastBooking(List<Booking> bookings) {
@@ -175,11 +197,11 @@ public class ItemServiceImpl implements ItemService {
         return bookingNext;
     }
 
-    void checkIfUserExistsById(long userId) {
-        userService.findById(userId);
+    private void userExistsOrThrow(long userId) {
+        userService.existsByIdOrThrow(userId);
     }
 
-    private void checkUserOwnershipOfItem(long userId, Item item) {
+    private void userOwnsItemOrThrow(long userId, Item item) {
         if (userId != item.getOwnerId()) {
             throw ExceptionUtils.getUserNotOwnItemException(userId, item.getId());
         }

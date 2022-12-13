@@ -41,14 +41,14 @@ public class ExceptionUtils {
         return new BookingNotFoundException(message);
     }
 
-    public static UserNotRelatedToBookingException getUserNotRelatedToBookingException(long userId, long bookingId) {
+    public static UserNotRelatedWithBookingException getUserNotRelatedWithBookingException(long userId, long bookingId) {
         String message = String.format(
                 "%s [userId = %d, bookingId = %d]",
-                ExceptionMessage.USER_NOT_RELATED_TO_BOOKING,
+                ExceptionMessage.USER_NOT_RELATED_WITH_BOOKING,
                 userId,
                 bookingId
         );
-        return new UserNotRelatedToBookingException(message);
+        return new UserNotRelatedWithBookingException(message);
     }
 
     public static BookingStateUnknownException getBookingStateUnknownException(String state) {

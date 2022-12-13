@@ -6,7 +6,7 @@ public class ExceptionMessage {
 
     public static final String USER_NOT_OWN_ITEM = "User not own item";
 
-    public static final String USER_NOT_RELATED_TO_BOOKING = "User not related to booking";
+    public static final String USER_NOT_RELATED_WITH_BOOKING = "User not related with booking";
 
     public static final String USER_NOT_BOOKED_ITEM = "User not booked item";
 

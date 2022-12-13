@@ -1,7 +1,8 @@
 package ru.practicum.shareit.item.model;
 
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import ru.practicum.shareit.user.model.User;
 
 import javax.persistence.Column;
@@ -10,14 +11,15 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.OneToOne;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "comments")
-@Data
 @NoArgsConstructor
+@Getter
+@Setter
 public class Comment {
 
     @Id
@@ -27,11 +29,11 @@ public class Comment {
     @Column(name = "text", nullable = false)
     private String text;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "item_id", nullable = false)
     private Item item;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "author_id", nullable = false)
     private User author;
 

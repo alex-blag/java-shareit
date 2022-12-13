@@ -22,6 +22,7 @@ import ru.practicum.shareit.common.validation.Post;
 
 import java.util.List;
 
+import static ru.practicum.shareit.booking.model.BookingSortBy.SORT_BY_START_DESC;
 import static ru.practicum.shareit.common.CommonUtils.X_SHARER_USER_ID;
 
 @RestController
@@ -77,7 +78,7 @@ public class BookingController {
             @RequestParam(required = false, defaultValue = State.Default.ALL) State state,
             @RequestHeader(X_SHARER_USER_ID) long userId
     ) {
-        List<Booking> bookings = bookingService.findAllByBookerIdAndStateOrderByDateDesc(userId, state);
+        List<Booking> bookings = bookingService.findAllByBookerIdAndState(userId, state, SORT_BY_START_DESC);
         return toBookingsDto(bookings);
     }
 
@@ -86,7 +87,7 @@ public class BookingController {
             @RequestParam(required = false, defaultValue = State.Default.ALL) State state,
             @RequestHeader(X_SHARER_USER_ID) long userId
     ) {
-        List<Booking> bookings = bookingService.findAllByOwnerIdAndStateOrderByDateDesc(userId, state);
+        List<Booking> bookings = bookingService.findAllByOwnerIdAndState(userId, state, SORT_BY_START_DESC);
         return toBookingsDto(bookings);
     }
 
