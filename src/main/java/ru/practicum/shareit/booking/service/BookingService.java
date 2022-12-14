@@ -25,14 +25,14 @@ public interface BookingService extends Service<Booking> {
             Sort sort
     );
 
-    List<Booking> findDistinctByItemIdInAndEndIsBeforeAndStatus(
+    List<Booking> findAllByItemIdInAndEndIsBeforeAndStatus(
             List<Long> itemIds,
             LocalDateTime end,
             Status status,
             Sort sort
     );
 
-    List<Booking> findDistinctByItemIdInAndStartIsAfterAndStatus(
+    List<Booking> findAllByItemIdInAndStartIsAfterAndStatus(
             List<Long> itemIds,
             LocalDateTime start,
             Status status,

@@ -98,30 +98,28 @@ public class ItemServiceImpl implements ItemService {
         userExistsOrThrow(ownerId);
 
         List<Item> items = itemRepository.findAllByOwnerId(ownerId);
-        List<Long> itemIds = items
-                .stream()
+        List<Long> itemIds = items.stream()
                 .map(Item::getId)
                 .collect(toList());
 
-        Map<Item, List<Booking>> itemToLastBookings = bookingService.findDistinctByItemIdInAndEndIsBeforeAndStatus(
+        Map<Item, List<Booking>> itemToLastBookings = bookingService.findAllByItemIdInAndEndIsBeforeAndStatus(
                         itemIds,
                         LocalDateTime.now(),
                         Status.APPROVED,
-                        BookingSort.BY_END_DESC)
-                .stream()
+                        BookingSort.BY_END_DESC
+                ).stream()
                 .collect(groupingBy(Booking::getItem, toList()));
 
-        Map<Item, List<Booking>> itemToNextBookings = bookingService.findDistinctByItemIdInAndStartIsAfterAndStatus(
+        Map<Item, List<Booking>> itemToNextBookings = bookingService.findAllByItemIdInAndStartIsAfterAndStatus(
                         itemIds,
                         LocalDateTime.now(),
                         Status.APPROVED,
-                        BookingSort.BY_START_ASC)
-                .stream()
+                        BookingSort.BY_START_ASC
+                ).stream()
                 .collect(groupingBy(Booking::getItem, toList()));
 
         Map<Item, List<Comment>> itemToComments = commentRepository
-                .findAllByItemIdIn(itemIds, CommentSort.BY_CREATED_DESC)
-                .stream()
+                .findAllByItemIdIn(itemIds, CommentSort.BY_CREATED_DESC).stream()
                 .collect(groupingBy(Comment::getItem, toList()));
 
         items.forEach(
@@ -149,7 +147,7 @@ public class ItemServiceImpl implements ItemService {
         userExistsOrThrow(userId);
         Item item = findById(itemId);
 
-        List<Booking> lastBookings = bookingService.findDistinctByItemIdInAndEndIsBeforeAndStatus(
+        List<Booking> lastBookings = bookingService.findAllByItemIdInAndEndIsBeforeAndStatus(
                 List.of(item.getId()),
                 LocalDateTime.now(),
                 Status.APPROVED,
@@ -159,7 +157,7 @@ public class ItemServiceImpl implements ItemService {
         BookingNearest lastBooking = getBookingNearest(userId, lastBookings);
         item.setLastBooking(lastBooking);
 
-        List<Booking> nextBookings = bookingService.findDistinctByItemIdInAndStartIsAfterAndStatus(
+        List<Booking> nextBookings = bookingService.findAllByItemIdInAndStartIsAfterAndStatus(
                 List.of(item.getId()),
                 LocalDateTime.now(),
                 Status.APPROVED,

@@ -208,23 +208,23 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public List<Booking> findDistinctByItemIdInAndEndIsBeforeAndStatus(
+    public List<Booking> findAllByItemIdInAndEndIsBeforeAndStatus(
             List<Long> itemIds,
             LocalDateTime end,
             Status status,
             Sort sort
     ) {
-        return bookingRepository.findDistinctByItemIdInAndEndIsBeforeAndStatus(itemIds, end, status, sort);
+        return bookingRepository.findAllByItemIdInAndEndIsBeforeAndStatus(itemIds, end, status, sort);
     }
 
     @Override
-    public List<Booking> findDistinctByItemIdInAndStartIsAfterAndStatus(
+    public List<Booking> findAllByItemIdInAndStartIsAfterAndStatus(
             List<Long> itemIds,
             LocalDateTime start,
             Status status,
             Sort sort
     ) {
-        return bookingRepository.findDistinctByItemIdInAndStartIsAfterAndStatus(itemIds, start, status, sort);
+        return bookingRepository.findAllByItemIdInAndStartIsAfterAndStatus(itemIds, start, status, sort);
     }
 
     private void userExistsOrThrow(long userId) {
