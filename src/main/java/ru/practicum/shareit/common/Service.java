@@ -4,14 +4,14 @@ import java.util.List;
 
 public interface Service<T> {
 
-    T add(T obj);
+    T save(T entity);
 
     List<T> findAll();
 
-    T find(long id);
+    T findById(long id);
 
-    T change(T obj);
+    T update(T entity);
 
-    void wipe(long id);
+    void deleteById(long id);
 
 }

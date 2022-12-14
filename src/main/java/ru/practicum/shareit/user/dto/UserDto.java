@@ -1,8 +1,8 @@
 package ru.practicum.shareit.user.dto;
 
 import lombok.Data;
-import ru.practicum.shareit.common.Patch;
-import ru.practicum.shareit.common.Post;
+import ru.practicum.shareit.common.validation.Patch;
+import ru.practicum.shareit.common.validation.Post;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
