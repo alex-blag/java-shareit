@@ -102,7 +102,7 @@ public class ItemServiceImpl implements ItemService {
                 .map(Item::getId)
                 .collect(toList());
 
-        Map<Item, List<Booking>> itemToLastBookings = bookingService.findAllByItemIdInAndEndIsBeforeAndStatus(
+        Map<Item, List<Booking>> itemToLastBookings = bookingService.findAllByItemIdInAndStartLessThanEqualAndStatus(
                         itemIds,
                         LocalDateTime.now(),
                         Status.APPROVED,
@@ -110,7 +110,7 @@ public class ItemServiceImpl implements ItemService {
                 ).stream()
                 .collect(groupingBy(Booking::getItem, toList()));
 
-        Map<Item, List<Booking>> itemToNextBookings = bookingService.findAllByItemIdInAndStartIsAfterAndStatus(
+        Map<Item, List<Booking>> itemToNextBookings = bookingService.findAllByItemIdInAndStartAfterAndStatus(
                         itemIds,
                         LocalDateTime.now(),
                         Status.APPROVED,
@@ -147,7 +147,7 @@ public class ItemServiceImpl implements ItemService {
         userExistsOrThrow(userId);
         Item item = findById(itemId);
 
-        List<Booking> lastBookings = bookingService.findAllByItemIdInAndEndIsBeforeAndStatus(
+        List<Booking> lastBookings = bookingService.findAllByItemIdInAndStartLessThanEqualAndStatus(
                 List.of(item.getId()),
                 LocalDateTime.now(),
                 Status.APPROVED,
@@ -157,7 +157,7 @@ public class ItemServiceImpl implements ItemService {
         BookingNearest lastBooking = getBookingNearest(userId, lastBookings);
         item.setLastBooking(lastBooking);
 
-        List<Booking> nextBookings = bookingService.findAllByItemIdInAndStartIsAfterAndStatus(
+        List<Booking> nextBookings = bookingService.findAllByItemIdInAndStartAfterAndStatus(
                 List.of(item.getId()),
                 LocalDateTime.now(),
                 Status.APPROVED,
