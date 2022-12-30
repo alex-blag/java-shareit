@@ -1,6 +1,8 @@
 package ru.practicum.shareit.booking.dto;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import ru.practicum.shareit.common.validation.NotNullAndFuture;
 import ru.practicum.shareit.common.validation.NotNullAndFutureOrPresent;
 import ru.practicum.shareit.common.validation.Post;
@@ -11,6 +13,8 @@ import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class BookingPostDto {
 
     @NotNullAndFutureOrPresent(groups = Post.class, message = ExceptionMessage.BOOKING_DATE_INVALID)

@@ -26,4 +26,6 @@ public class ExceptionMessage {
 
     public static final String BOOKER_OWNS_ITEM = "Booker owns item";
 
+    public static final String REQUEST_NOT_FOUND = "Request not found";
+
 }

@@ -81,4 +81,9 @@ public class ExceptionUtils {
         return new UserNotBookedItemException(message);
     }
 
+    public static RequestNotFoundException getRequestNotFoundException(long requestId) {
+        String message = String.format("%s [requestId = %d]", ExceptionMessage.REQUEST_NOT_FOUND, requestId);
+        return new RequestNotFoundException(message);
+    }
+
 }

@@ -1,6 +1,8 @@
 package ru.practicum.shareit.item;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -19,10 +21,14 @@ import ru.practicum.shareit.item.dto.CommentMapper;
 import ru.practicum.shareit.item.dto.CommentPostDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemMapper;
+import ru.practicum.shareit.item.dto.ItemPostDto;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.item.model.ItemPager;
 import ru.practicum.shareit.item.service.ItemService;
 
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 import java.util.List;
 
 import static ru.practicum.shareit.common.CommonUtils.X_SHARER_USER_ID;
@@ -30,30 +36,37 @@ import static ru.practicum.shareit.common.CommonUtils.X_SHARER_USER_ID;
 @RestController
 @RequestMapping("/items")
 @RequiredArgsConstructor
+@Validated
 public class ItemController {
+
+    private static final String MAX_SIZE = CommonUtils.INTEGER_MAX_VALUE;
 
     private final ItemService itemService;
 
     @PostMapping
     public ItemDto post(
             @RequestHeader(X_SHARER_USER_ID) long userId,
-            @Validated(Post.class) @RequestBody ItemDto itemDto
+            @Validated(Post.class) @RequestBody ItemPostDto itemPostDto
     ) {
-        itemDto.setOwner(userId);
-        Item item = itemService.save(toItem(itemDto));
-        return toItemDto(item);
+        Item item = toItem(itemPostDto);
+        item.setOwnerId(userId);
+
+        Item savedItem = itemService.save(item);
+        return toItemDto(savedItem);
     }
 
     @PatchMapping("/{itemId}")
     public ItemDto patch(
             @PathVariable long itemId,
             @RequestHeader(X_SHARER_USER_ID) long userId,
-            @Validated(Patch.class) @RequestBody ItemDto itemDto
+            @Validated(Patch.class) @RequestBody ItemPostDto itemPostDto
     ) {
-        itemDto.setId(itemId);
-        itemDto.setOwner(userId);
-        Item item = itemService.update(toItem(itemDto));
-        return toItemDto(item);
+        Item item = toItem(itemPostDto);
+        item.setId(itemId);
+        item.setOwnerId(userId);
+
+        Item updatedItem = itemService.update(item);
+        return toItemDto(updatedItem);
     }
 
     @GetMapping("/{itemId}")
@@ -67,17 +80,24 @@ public class ItemController {
 
     @GetMapping
     public List<ItemDto> getAllByUserId(
+            @RequestParam(defaultValue = "0") @PositiveOrZero int from,
+            @RequestParam(defaultValue = MAX_SIZE) @Positive int size,
             @RequestHeader(X_SHARER_USER_ID) long userId
     ) {
-        List<Item> items = itemService.findAllByOwnerId(userId);
+        Pageable pageable = PageRequest.of(from / size, size);
+        List<Item> items = itemService.findAllByOwnerId(userId, pageable);
         return toItemsDto(items);
     }
 
     @GetMapping("/search")
     public List<ItemDto> getAllByNameOrDescriptionContaining(
-            @RequestParam String text
+            @RequestParam(defaultValue = "0") @PositiveOrZero int from,
+            @RequestParam(defaultValue = MAX_SIZE) @Positive int size,
+            @RequestParam String text,
+            @RequestHeader(X_SHARER_USER_ID) long userId
     ) {
-        List<Item> items = findAllByNameOrDescriptionContaining(text);
+        Pageable pageable = ItemPager.unsorted(from / size, size);
+        List<Item> items = itemService.findAllByNameOrDescriptionContaining(userId, text, pageable);
         return toItemsDto(items);
     }
 
@@ -95,10 +115,8 @@ public class ItemController {
         return toCommentDto(savedComment);
     }
 
-    private List<Item> findAllByNameOrDescriptionContaining(String text) {
-        return CommonUtils.isStringNotBlank(text)
-                ? itemService.findAllByNameOrDescriptionContaining(text)
-                : List.of();
+    private Item toItem(ItemPostDto itemPostDto) {
+        return ItemMapper.toItem(itemPostDto);
     }
 
     private Item toItem(ItemDto itemDto) {
