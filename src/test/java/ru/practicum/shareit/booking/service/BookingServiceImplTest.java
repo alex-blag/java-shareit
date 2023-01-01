@@ -100,7 +100,7 @@ class BookingServiceImplTest {
 
     @Test
     void deleteById() {
-        assertThrows(UnsupportedOperationException.class, () -> bookingServiceImpl.findAll());
+        assertThrows(UnsupportedOperationException.class, () -> bookingServiceImpl.deleteById(0L));
     }
 
     @Test

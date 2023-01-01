@@ -3,6 +3,8 @@ package ru.practicum.shareit.common;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import ru.practicum.shareit.booking.dto.BookingDto;
+import ru.practicum.shareit.booking.dto.BookingMapper;
+import ru.practicum.shareit.booking.dto.BookingNearestDto;
 import ru.practicum.shareit.booking.dto.BookingPostDto;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.BookingNearest;
@@ -393,6 +395,10 @@ public class TestUtils {
                 "user1_name",
                 "user1@mail.com"
         );
+    }
+
+    public static BookingNearestDto getBookingNearestDto() {
+        return BookingMapper.toBookingNearestDto(getItem1NextBookingNearest());
     }
 
 }

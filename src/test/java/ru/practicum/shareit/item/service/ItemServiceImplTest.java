@@ -11,6 +11,7 @@ import ru.practicum.shareit.booking.model.Status;
 import ru.practicum.shareit.booking.service.BookingService;
 import ru.practicum.shareit.common.TestUtils;
 import ru.practicum.shareit.exception.ItemNotFoundException;
+import ru.practicum.shareit.exception.UserNotBookedItemException;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.model.ItemPager;
@@ -103,7 +104,7 @@ class ItemServiceImplTest {
 
     @Test
     void deleteById() {
-        assertThrows(UnsupportedOperationException.class, () -> itemServiceImpl.findAll());
+        assertThrows(UnsupportedOperationException.class, () -> itemServiceImpl.deleteById(0L));
     }
 
     @Test
@@ -225,7 +226,32 @@ class ItemServiceImplTest {
     }
 
     @Test
-    void findAllByRequestIdIn() {
+    void save_givenCommentAndNonExistingBookings_expectUserNotBookedItemException() {
+        Comment comment = TestUtils.getItem1Comment();
+        User author = comment.getAuthor();
+        long authorId = author.getId();
+
+        when(userService.findById(authorId)).thenReturn(author);
+
+        Item item = comment.getItem();
+        long itemId = item.getId();
+        when(itemRepository.findById(itemId)).thenReturn(Optional.of(item));
+
+        List<Booking> bookings = List.of();
+        when(bookingService.findAllByBookerIdAndItemIdAndEndBeforeAndStatus(
+                anyLong(),
+                anyLong(),
+                any(LocalDateTime.class),
+                any(Status.class),
+                any(Pageable.class)
+        ))
+                .thenReturn(bookings);
+
+        assertThrows(UserNotBookedItemException.class, () -> itemServiceImpl.save(comment));
+    }
+
+    @Test
+    void findAllByRequestIdIn_givenRequestItems_expectCorrect() {
         Item item1 = TestUtils.getItem1();
         List<Long> requestIds = List.of(item1.getRequestId());
 

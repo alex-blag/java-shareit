@@ -32,10 +32,4 @@ public class User {
     @Column(length = 100, nullable = false, unique = true)
     private String email;
 
-    public User(User user) {
-        this.id = user.getId();
-        this.name = user.getName();
-        this.email = user.getEmail();
-    }
-
 }

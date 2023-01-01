@@ -53,15 +53,6 @@ public class Item {
     @Transient
     private List<Comment> comments;
 
-    public Item(Item item) {
-        this.id = item.getId();
-        this.name = item.getName();
-        this.description = item.getDescription();
-        this.available = item.getAvailable();
-        this.ownerId = item.getOwnerId();
-        this.requestId = item.getRequestId();
-    }
-
     @Override
     public int hashCode() {
         return getClass().hashCode();

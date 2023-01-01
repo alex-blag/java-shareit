@@ -8,6 +8,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.practicum.shareit.common.TestUtils;
+import ru.practicum.shareit.exception.ExceptionUtils;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.service.UserService;
@@ -118,48 +119,15 @@ class UserControllerTest {
         verify(userService).deleteById(TestUtils.USER1_ID);
     }
 
-    //    @BeforeEach
-//    void setUp() {
-//    }
-//
-//    @AfterEach
-//    void tearDown() {
-//    }
+    @Test
+    void get_givenNonExistingUserId_expectException() throws Exception {
+        long userId = 0L;
 
-//    private static String asJsonString(final Object obj) {
-//        try {
-//            return new ObjectMapper().writeValueAsString(obj);
-//        } catch (Exception e) {
-//            throw new RuntimeException(e);
-//        }
-//    }
+        when(userService.findById(userId))
+                .thenThrow(ExceptionUtils.getUserNotFoundException(userId));
 
-//                .andExpect(objectMapper.readValue(content().toString(), UserDto.class) ));
-
-//        mvc.perform( MockMvcRequestBuilders
-//                        .post("/employees")
-//                        .content(asJsonString(new EmployeeVO(null, "firstName4", "lastName4", "email4@mail.com")))
-//                        .contentType(MediaType.APPLICATION_JSON)
-//                        .accept(MediaType.APPLICATION_JSON))
-//                .andExpect(status().isCreated())
-//                .andExpect(MockMvcResultMatchers.jsonPath("$.employeeId").exists());
-
-
-//        mvc.perform(post("/users")
-//                        .content(mapper.writeValueAsString(userDto))
-//                        .characterEncoding(StandardCharsets.UTF_8)
-//                        .contentType(MediaType.APPLICATION_JSON)
-//                        .accept(MediaType.APPLICATION_JSON))
-//                .andExpect(status().isOk())
-//                .andExpect(jsonPath("$.id", is(userDto.getId()), Long.class))
-//                .andExpect(jsonPath("$.name", is(userDto.getLastName())))
-//                .andExpect(jsonPath("$.email", is(userDto.getEmail())));
-
-    //   verify(userService).save(user);
-
-//        String contentAsString = mvcResult.getResponse().getContentAsString();
-//        UserDto userDto = objectMapper.readValue(contentAsString, UserDto.class);
-//
-//        assertEquals(savedUserDto, userDto);
+        mockMvc.perform(get("/users/{userId}", userId))
+                .andExpect(status().isNotFound());
+    }
 
 }
