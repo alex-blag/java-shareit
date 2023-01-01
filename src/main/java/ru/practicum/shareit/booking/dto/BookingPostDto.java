@@ -27,7 +27,7 @@ public class BookingPostDto {
     private Long itemId;
 
     @AssertTrue(groups = Post.class, message = ExceptionMessage.BOOKING_DATE_INVALID)
-    private boolean isStartBeforeEnd() {
+    public boolean isStartBeforeEnd() {
         return start.isBefore(end);
     }
 

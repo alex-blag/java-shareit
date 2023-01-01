@@ -2,14 +2,20 @@ package ru.practicum.shareit.common;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingPostDto;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.BookingNearest;
 import ru.practicum.shareit.booking.model.Status;
+import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.CommentPostDto;
+import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemPostDto;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.request.dto.RequestDto;
+import ru.practicum.shareit.request.dto.RequestPostDto;
+import ru.practicum.shareit.request.model.Request;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
 
@@ -27,18 +33,22 @@ public class TestUtils {
     public static final long ITEM1_OWNER_ID = 12L;
     public static final long ITEM1_REQUEST_ID = 14L;
 
-    public static final long COMMENT1_ID = 20L;
-    public static final long COMMENT1_AUTHOR_ID = 22L;
+    public static final long REQUEST1_ID = 20;
+    public static final long REQUESTER1_ID = 22;
 
+    public static final long COMMENT1_ID = 30L;
+    public static final long COMMENT1_AUTHOR_ID = 32L;
+
+    public static final long BOOKING1_ID = 40L;
     public static final LocalDateTime BOOKING1_START = LocalDateTime.now().plusMinutes(1L);
     public static final LocalDateTime BOOKING1_END = LocalDateTime.now().plusMinutes(2L);
+    public static final long BOOKING1_BOOKER_ID = 42L;
 
-    public static final long BOOKING1_ID = 30L;
-    public static final long BOOKING1_BOOKER_ID = 32L;
-    public static final long LAST_BOOKING_ID = 40L;
-    public static final long LAST_BOOKING_BOOKER_ID = 42L;
-    public static final long NEXT_BOOKING_ID = 50L;
-    public static final long NEXT_BOOKING_BOOKER_ID = 52;
+    public static final long LAST_BOOKING_ID = 50L;
+    public static final long LAST_BOOKING_BOOKER_ID = 52L;
+    public static final long NEXT_BOOKING_ID = 60L;
+    public static final long NEXT_BOOKING_BOOKER_ID = 62;
+
 
     public static User getUser1() {
         return new User(USER1_ID, "user1Name", "user1@mail.com");
@@ -255,6 +265,133 @@ public class TestUtils {
                 null,
                 null,
                 null
+        );
+    }
+
+    public static Request getRequest1() {
+        return new Request(
+                REQUEST1_ID,
+                "request1_description",
+                getRequester1(),
+                LocalDateTime.now(),
+                null
+        );
+    }
+
+    private static User getRequester1() {
+        return new User(REQUESTER1_ID, "requester1", "requester1@mail.com");
+    }
+
+    public static RequestPostDto getRequestPostDto() {
+        return new RequestPostDto("request1_description");
+    }
+
+    public static Request getRequest1WithoutId() {
+        return new Request(
+                null,
+                "request1_description",
+                getRequester1(),
+                null,
+                null
+        );
+    }
+
+    public static Item getRequest1Item() {
+        return new Item(
+                ITEM1_ID,
+                "item1_name",
+                "item1_description",
+                true,
+                ITEM1_OWNER_ID,
+                REQUEST1_ID,
+                null,
+                null,
+                null
+        );
+    }
+
+    public static BookingDto getBooking1Dto() {
+        return new BookingDto(
+                BOOKING1_ID,
+                BOOKING1_START,
+                BOOKING1_END,
+                getBooking1ItemDto(),
+                getBooking1BookerDto(),
+                Status.WAITING
+        );
+    }
+
+    private static UserDto getBooking1BookerDto() {
+        return new UserDto(
+                USER1_ID,
+                "booker1_name",
+                "booker1@mail.com"
+        );
+    }
+
+    public static ItemDto getBooking1ItemDto() {
+        return new ItemDto(
+                ITEM1_ID,
+                "item1_name",
+                "item1_description",
+                true,
+                ITEM1_OWNER_ID,
+                ITEM1_REQUEST_ID,
+                null,
+                null,
+                null
+        );
+    }
+
+    public static CommentDto getComment1Dto() {
+        return new CommentDto(
+                COMMENT1_ID,
+                "comment1_text",
+                "comment1_author_name",
+                LocalDateTime.now()
+        );
+    }
+
+    public static ItemDto getItem1Dto() {
+        return new ItemDto(
+                ITEM1_ID,
+                "item1_name",
+                "item1_description",
+                true,
+                ITEM1_OWNER_ID,
+                ITEM1_REQUEST_ID,
+                null,
+                null,
+                null
+        );
+    }
+
+    public static RequestDto getRequest1Dto() {
+        return new RequestDto(
+                REQUEST1_ID,
+                "request1_description",
+                getRequester1Dto(),
+                LocalDateTime.now(),
+                null
+        );
+    }
+
+
+    private static UserDto getRequester1Dto() {
+        return new UserDto(REQUESTER1_ID, "requester1", "requester1@mail.com");
+    }
+
+    public static RequestPostDto getRequest1PostDto() {
+        return new RequestPostDto(
+                "request1_description"
+        );
+    }
+
+    public static UserDto getUser1Dto() {
+        return new UserDto(
+                USER1_ID,
+                "user1_name",
+                "user1@mail.com"
         );
     }
 
