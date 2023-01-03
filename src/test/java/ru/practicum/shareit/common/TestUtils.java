@@ -23,6 +23,7 @@ import ru.practicum.shareit.user.model.User;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Random;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class TestUtils {
@@ -31,9 +32,12 @@ public class TestUtils {
 
     public static final long USER1_ID = 1L;
 
-    public static final long ITEM1_ID = 10L;
-    public static final long ITEM1_OWNER_ID = 12L;
-    public static final long ITEM1_REQUEST_ID = 14L;
+    public static final long ITEM1_ID = 11L;
+    public static final long ITEM2_ID = 12L;
+    public static final long ITEM1_OWNER_ID = 14L;
+    public static final long ITEM1_REQUEST_ID = 16L;
+    public static final long ITEM2_OWNER_ID = 0L;
+    public static final long ITEM2_REQUEST_ID = 0L;
 
     public static final long REQUEST1_ID = 20;
     public static final long REQUESTER1_ID = 22;
@@ -41,16 +45,16 @@ public class TestUtils {
     public static final long COMMENT1_ID = 30L;
     public static final long COMMENT1_AUTHOR_ID = 32L;
 
-    public static final long BOOKING1_ID = 40L;
+    public static final long BOOKING1_ID = 41L;
+    public static final long BOOKING2_ID = 42L;
     public static final LocalDateTime BOOKING1_START = LocalDateTime.now().plusMinutes(1L);
     public static final LocalDateTime BOOKING1_END = LocalDateTime.now().plusMinutes(2L);
-    public static final long BOOKING1_BOOKER_ID = 42L;
+    public static final long BOOKING1_BOOKER_ID = 44L;
 
     public static final long LAST_BOOKING_ID = 50L;
     public static final long LAST_BOOKING_BOOKER_ID = 52L;
     public static final long NEXT_BOOKING_ID = 60L;
     public static final long NEXT_BOOKING_BOOKER_ID = 62;
-
 
     public static User getUser1() {
         return new User(USER1_ID, "user1Name", "user1@mail.com");
@@ -252,24 +256,6 @@ public class TestUtils {
         );
     }
 
-    public static User getUserWithoutId() {
-        return new User(null, "userName", "user@mail.com");
-    }
-
-    public static Item getItemWithoutId() {
-        return new Item(
-                null,
-                "item_name",
-                "item_description",
-                true,
-                null,
-                null,
-                null,
-                null,
-                null
-        );
-    }
-
     public static Request getRequest1() {
         return new Request(
                 REQUEST1_ID,
@@ -399,6 +385,50 @@ public class TestUtils {
 
     public static BookingNearestDto getBookingNearestDto() {
         return BookingMapper.toBookingNearestDto(getItem1NextBookingNearest());
+    }
+
+    public static Booking getBookingWithOnlyStatus() {
+        return new Booking(
+                null,
+                null,
+                null,
+                null,
+                null,
+                Status.WAITING
+        );
+    }
+
+    public static Item getItemWithoutIdAndOwnerId() {
+        String itemName = "item_" + getRandomString();
+
+        return new Item(
+                null,
+                itemName,
+                itemName + "_description",
+                true,
+                null,
+                null,
+                null,
+                null,
+                null
+        );
+    }
+
+    private static String getRandomString() {
+        int l = 97;
+        int r = 122;
+        int length = 6;
+
+        return new Random()
+                .ints(l, r + 1)
+                .limit(length)
+                .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
+                .toString();
+    }
+
+    public static User getUserWithoutId() {
+        String userName = "user_" + getRandomString();
+        return new User(null, userName, userName + "@mail.com");
     }
 
 }

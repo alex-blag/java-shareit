@@ -1,5 +1,6 @@
 package ru.practicum.shareit.item.repository;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +24,12 @@ class ItemRepositoryTest {
     @Autowired
     UserRepository userRepository;
 
+    @AfterEach
+    void tearDown() {
+        itemRepository.deleteAll();
+        userRepository.deleteAll();
+    }
+
     @Test
     void findAllByNameOrDescriptionContaining_givenEmptyRepository_expectCorrect() {
         List<Item> items = itemRepository.findAllByNameOrDescriptionContaining(SEARCH_TEXT, Pageable.unpaged());
@@ -34,7 +41,7 @@ class ItemRepositoryTest {
         User user = TestUtils.getUserWithoutId();
         User savedUser = userRepository.save(user);
 
-        Item item = TestUtils.getItemWithoutId();
+        Item item = TestUtils.getItemWithoutIdAndOwnerId();
         item.setOwnerId(savedUser.getId());
         Item savedItem = itemRepository.save(item);
 
