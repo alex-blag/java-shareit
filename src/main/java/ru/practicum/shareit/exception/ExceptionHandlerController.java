@@ -76,6 +76,12 @@ public class ExceptionHandlerController {
     }
 
     @ExceptionHandler
+    public ResponseEntity<String> handle(RequestNotFoundException e) {
+        logError(e);
+        return getExceptionResponse(ExceptionMessage.REQUEST_NOT_FOUND, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler
     public ResponseEntity<String> handle(MethodArgumentNotValidException e) {
         logError(e);
         return getExceptionResponse(

@@ -1,7 +1,7 @@
 package ru.practicum.shareit.booking.service;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.model.Booking;
@@ -10,13 +10,15 @@ import ru.practicum.shareit.booking.model.Status;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.exception.ExceptionUtils;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.item.model.ItemPager;
 import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.service.UserService;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.toList;
 
 @Transactional(readOnly = true)
 @Service
@@ -90,13 +92,13 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public List<Booking> findAllByBookerIdAndState(long bookerId, State state, Sort sort) {
+    public List<Booking> findAllByBookerIdAndState(long bookerId, State state, Pageable pageable) {
         userExistsOrThrow(bookerId);
 
         List<Booking> bookings = null;
         switch (state) {
             case ALL:
-                bookings = bookingRepository.findAllByBookerId(bookerId, sort);
+                bookings = bookingRepository.findAllByBookerId(bookerId, pageable);
                 break;
 
             case CURRENT:
@@ -104,7 +106,7 @@ public class BookingServiceImpl implements BookingService {
                         bookerId,
                         LocalDateTime.now(),
                         LocalDateTime.now(),
-                        sort
+                        pageable
                 );
                 break;
 
@@ -113,7 +115,7 @@ public class BookingServiceImpl implements BookingService {
                         bookerId,
                         LocalDateTime.now(),
                         Status.APPROVED,
-                        sort
+                        pageable
                 );
                 break;
 
@@ -121,16 +123,16 @@ public class BookingServiceImpl implements BookingService {
                 bookings = bookingRepository.findAllByBookerIdAndStartAfter(
                         bookerId,
                         LocalDateTime.now(),
-                        sort
+                        pageable
                 );
                 break;
 
             case WAITING:
-                bookings = bookingRepository.findAllByBookerIdAndStatus(bookerId, Status.WAITING, sort);
+                bookings = bookingRepository.findAllByBookerIdAndStatus(bookerId, Status.WAITING, pageable);
                 break;
 
             case REJECTED:
-                bookings = bookingRepository.findAllByBookerIdAndStatus(bookerId, Status.REJECTED, sort);
+                bookings = bookingRepository.findAllByBookerIdAndStatus(bookerId, Status.REJECTED, pageable);
                 break;
         }
 
@@ -138,18 +140,18 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public List<Booking> findAllByOwnerIdAndState(long ownerId, State state, Sort sort) {
+    public List<Booking> findAllByOwnerIdAndState(long ownerId, State state, Pageable pageable) {
         userExistsOrThrow(ownerId);
 
-        List<Long> itemIds = itemService.findAllByOwnerId(ownerId).stream()
+        List<Long> itemIds = itemService.findAllByOwnerId(ownerId, ItemPager.unsorted())
+                .stream()
                 .map(Item::getId)
-                .collect(Collectors
-                        .toList());
+                .collect(toList());
 
         List<Booking> bookings = null;
         switch (state) {
             case ALL:
-                bookings = bookingRepository.findAllByItemIdIn(itemIds, sort);
+                bookings = bookingRepository.findAllByItemIdIn(itemIds, pageable);
                 break;
 
             case CURRENT:
@@ -157,7 +159,7 @@ public class BookingServiceImpl implements BookingService {
                         itemIds,
                         LocalDateTime.now(),
                         LocalDateTime.now(),
-                        sort
+                        pageable
                 );
                 break;
 
@@ -166,7 +168,7 @@ public class BookingServiceImpl implements BookingService {
                         itemIds,
                         LocalDateTime.now(),
                         Status.APPROVED,
-                        sort
+                        pageable
                 );
                 break;
 
@@ -174,16 +176,16 @@ public class BookingServiceImpl implements BookingService {
                 bookings = bookingRepository.findAllByItemIdInAndStartAfter(
                         itemIds,
                         LocalDateTime.now(),
-                        sort
+                        pageable
                 );
                 break;
 
             case WAITING:
-                bookings = bookingRepository.findAllByItemIdInAndStatus(itemIds, Status.WAITING, sort);
+                bookings = bookingRepository.findAllByItemIdInAndStatus(itemIds, Status.WAITING, pageable);
                 break;
 
             case REJECTED:
-                bookings = bookingRepository.findAllByItemIdInAndStatus(itemIds, Status.REJECTED, sort);
+                bookings = bookingRepository.findAllByItemIdInAndStatus(itemIds, Status.REJECTED, pageable);
                 break;
         }
 
@@ -196,14 +198,14 @@ public class BookingServiceImpl implements BookingService {
             long itemId,
             LocalDateTime end,
             Status status,
-            Sort sort
+            Pageable pageable
     ) {
         return bookingRepository.findAllByBookerIdAndItemIdAndEndBeforeAndStatus(
                 bookerId,
                 itemId,
                 end,
                 status,
-                sort
+                pageable
         );
     }
 
@@ -212,9 +214,9 @@ public class BookingServiceImpl implements BookingService {
             List<Long> itemIds,
             LocalDateTime start,
             Status status,
-            Sort sort
+            Pageable pageable
     ) {
-        return bookingRepository.findAllByItemIdInAndStartLessThanEqualAndStatus(itemIds, start, status, sort);
+        return bookingRepository.findAllByItemIdInAndStartLessThanEqualAndStatus(itemIds, start, status, pageable);
     }
 
     @Override
@@ -222,9 +224,9 @@ public class BookingServiceImpl implements BookingService {
             List<Long> itemIds,
             LocalDateTime start,
             Status status,
-            Sort sort
+            Pageable pageable
     ) {
-        return bookingRepository.findAllByItemIdInAndStartAfterAndStatus(itemIds, start, status, sort);
+        return bookingRepository.findAllByItemIdInAndStartAfterAndStatus(itemIds, start, status, pageable);
     }
 
     private void userExistsOrThrow(long userId) {

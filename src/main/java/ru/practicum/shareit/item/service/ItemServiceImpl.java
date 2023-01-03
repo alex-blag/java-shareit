@@ -2,17 +2,18 @@ package ru.practicum.shareit.item.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.BookingNearest;
-import ru.practicum.shareit.booking.model.BookingSort;
+import ru.practicum.shareit.booking.model.BookingPager;
 import ru.practicum.shareit.booking.model.Status;
 import ru.practicum.shareit.booking.service.BookingService;
 import ru.practicum.shareit.common.CommonUtils;
 import ru.practicum.shareit.exception.ExceptionUtils;
 import ru.practicum.shareit.item.model.Comment;
-import ru.practicum.shareit.item.model.CommentSort;
+import ru.practicum.shareit.item.model.CommentPager;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.CommentRepository;
 import ru.practicum.shareit.item.repository.ItemRepository;
@@ -94,11 +95,12 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public List<Item> findAllByOwnerId(long ownerId) {
+    public List<Item> findAllByOwnerId(long ownerId, Pageable pageable) {
         userExistsOrThrow(ownerId);
 
-        List<Item> items = itemRepository.findAllByOwnerId(ownerId);
-        List<Long> itemIds = items.stream()
+        List<Item> items = itemRepository.findAllByOwnerId(ownerId, pageable);
+        List<Long> itemIds = items
+                .stream()
                 .map(Item::getId)
                 .collect(toList());
 
@@ -106,20 +108,23 @@ public class ItemServiceImpl implements ItemService {
                         itemIds,
                         LocalDateTime.now(),
                         Status.APPROVED,
-                        BookingSort.BY_END_DESC
-                ).stream()
+                        BookingPager.byStartDesc()
+                )
+                .stream()
                 .collect(groupingBy(Booking::getItem, toList()));
 
         Map<Item, List<Booking>> itemToNextBookings = bookingService.findAllByItemIdInAndStartAfterAndStatus(
                         itemIds,
                         LocalDateTime.now(),
                         Status.APPROVED,
-                        BookingSort.BY_START_ASC
-                ).stream()
+                        BookingPager.byStartAsc()
+                )
+                .stream()
                 .collect(groupingBy(Booking::getItem, toList()));
 
         Map<Item, List<Comment>> itemToComments = commentRepository
-                .findAllByItemIdIn(itemIds, CommentSort.BY_CREATED_DESC).stream()
+                .findAllByItemIdIn(itemIds, CommentPager.byCreatedDesc())
+                .stream()
                 .collect(groupingBy(Comment::getItem, toList()));
 
         items.forEach(
@@ -138,20 +143,25 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public List<Item> findAllByNameOrDescriptionContaining(String text) {
-        return itemRepository.findAllByNameOrDescriptionContaining(text);
+    public List<Item> findAllByNameOrDescriptionContaining(long userId, String text, Pageable pageable) {
+        userExistsOrThrow(userId);
+
+        return CommonUtils.isStringNotBlank(text)
+                ? itemRepository.findAllByNameOrDescriptionContaining(text, pageable)
+                : List.of();
     }
 
     @Override
     public Item findByIdAndUserId(long itemId, long userId) {
         userExistsOrThrow(userId);
+
         Item item = findById(itemId);
 
         List<Booking> lastBookings = bookingService.findAllByItemIdInAndStartLessThanEqualAndStatus(
                 List.of(item.getId()),
                 LocalDateTime.now(),
                 Status.APPROVED,
-                BookingSort.BY_END_DESC
+                BookingPager.byStartDesc()
         );
 
         BookingNearest lastBooking = getBookingNearest(userId, lastBookings);
@@ -161,7 +171,7 @@ public class ItemServiceImpl implements ItemService {
                 List.of(item.getId()),
                 LocalDateTime.now(),
                 Status.APPROVED,
-                BookingSort.BY_START_ASC
+                BookingPager.byStartAsc()
         );
 
         BookingNearest nextBooking = getBookingNearest(userId, nextBookings);
@@ -189,7 +199,7 @@ public class ItemServiceImpl implements ItemService {
                 itemId,
                 LocalDateTime.now(),
                 Status.APPROVED,
-                BookingSort.BY_START_DESC
+                BookingPager.byStartDesc()
         );
 
         if (bookings.isEmpty()) {
@@ -198,6 +208,11 @@ public class ItemServiceImpl implements ItemService {
 
         comment.setCreated(LocalDateTime.now());
         return commentRepository.save(comment);
+    }
+
+    @Override
+    public List<Item> findAllByRequestIdIn(List<Long> requestIds) {
+        return itemRepository.findAllByRequestIdIn(requestIds);
     }
 
     private BookingNearest getBookingNearest(long userId, List<Booking> bookings) {

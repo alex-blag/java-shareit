@@ -1,6 +1,8 @@
 package ru.practicum.shareit.item.dto;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import ru.practicum.shareit.booking.dto.BookingNearestDto;
 import ru.practicum.shareit.common.validation.Post;
 
@@ -9,6 +11,8 @@ import javax.validation.constraints.NotNull;
 import java.util.List;
 
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class ItemDto {
 
     private Long id;
@@ -22,9 +26,9 @@ public class ItemDto {
     @NotNull(groups = Post.class)
     private Boolean available;
 
-    private Long owner;
+    private Long ownerId;
 
-    private Long request;
+    private Long requestId;
 
     private BookingNearestDto lastBooking;
 

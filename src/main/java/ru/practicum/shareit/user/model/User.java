@@ -1,5 +1,7 @@
 package ru.practicum.shareit.user.model;
 
+import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -14,8 +16,10 @@ import javax.persistence.Table;
 @Entity
 @Table(name = "users")
 @NoArgsConstructor
+@AllArgsConstructor
 @Getter
 @Setter
+@EqualsAndHashCode
 public class User {
 
     @Id
@@ -27,11 +31,5 @@ public class User {
 
     @Column(length = 100, nullable = false, unique = true)
     private String email;
-
-    public User(User user) {
-        this.id = user.getId();
-        this.name = user.getName();
-        this.email = user.getEmail();
-    }
 
 }

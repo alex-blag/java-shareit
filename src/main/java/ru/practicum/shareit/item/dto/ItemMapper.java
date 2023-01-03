@@ -21,8 +21,8 @@ public class ItemMapper {
         itemDto.setDescription(item.getDescription());
         itemDto.setAvailable(item.getAvailable());
 
-        itemDto.setOwner(item.getOwnerId());
-        itemDto.setRequest(item.getRequestId());
+        itemDto.setOwnerId(item.getOwnerId());
+        itemDto.setRequestId(item.getRequestId());
 
         BookingNearest lastBooking = item.getLastBooking();
         if (lastBooking != null) {
@@ -46,20 +46,37 @@ public class ItemMapper {
 
     public static Item toItem(ItemDto itemDto) {
         Item item = new Item();
-        item.setId(itemDto.getId());
-        item.setName(itemDto.getName());
-        item.setDescription(itemDto.getDescription());
-        item.setAvailable(itemDto.getAvailable());
-        item.setOwnerId(itemDto.getOwner());
-        item.setRequestId(itemDto.getRequest());
+        if (itemDto != null) {
+            item.setId(itemDto.getId());
+            item.setName(itemDto.getName());
+            item.setDescription(itemDto.getDescription());
+            item.setAvailable(itemDto.getAvailable());
+            item.setOwnerId(itemDto.getOwnerId());
+            item.setRequestId(itemDto.getRequestId());
+        }
         return item;
     }
 
     public static List<ItemDto> toItemsDto(List<Item> items) {
+        if (items == null) {
+            items = List.of();
+        }
+
         return items.stream()
                 .map(ItemMapper::toItemDto)
                 .collect(Collectors
                         .toList());
+    }
+
+    public static Item toItem(ItemPostDto itemPostDto) {
+        Item item = new Item();
+        if (itemPostDto != null) {
+            item.setName(itemPostDto.getName());
+            item.setDescription(itemPostDto.getDescription());
+            item.setAvailable(itemPostDto.getAvailable());
+            item.setRequestId(itemPostDto.getRequestId());
+        }
+        return item;
     }
 
 }

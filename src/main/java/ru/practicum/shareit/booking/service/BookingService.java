@@ -1,6 +1,6 @@
 package ru.practicum.shareit.booking.service;
 
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Pageable;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.State;
 import ru.practicum.shareit.booking.model.Status;
@@ -13,30 +13,30 @@ public interface BookingService extends Service<Booking> {
 
     Booking findByIdAndOwnerIdOrBookerId(long bookingId, long userId);
 
-    List<Booking> findAllByBookerIdAndState(long bookerId, State state, Sort sort);
+    List<Booking> findAllByBookerIdAndState(long bookerId, State state, Pageable pageable);
 
-    List<Booking> findAllByOwnerIdAndState(long ownerId, State state, Sort sort);
+    List<Booking> findAllByOwnerIdAndState(long ownerId, State state, Pageable pageable);
 
     List<Booking> findAllByBookerIdAndItemIdAndEndBeforeAndStatus(
             long bookerId,
             long itemId,
             LocalDateTime end,
             Status status,
-            Sort sort
+            Pageable pageable
     );
 
     List<Booking> findAllByItemIdInAndStartLessThanEqualAndStatus(
             List<Long> itemIds,
             LocalDateTime start,
             Status status,
-            Sort sort
+            Pageable pageable
     );
 
     List<Booking> findAllByItemIdInAndStartAfterAndStatus(
             List<Long> itemIds,
             LocalDateTime start,
             Status status,
-            Sort sort
+            Pageable pageable
     );
 
 }
