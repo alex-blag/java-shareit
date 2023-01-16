@@ -148,9 +148,7 @@ public class ItemServiceImpl implements ItemService {
     public List<Item> findAllByNameOrDescriptionContaining(long userId, String text, Pageable pageable) {
         userExistsOrThrow(userId);
 
-        return CommonUtils.isStringNotBlank(text)
-                ? itemRepository.findAllByNameOrDescriptionContaining(text, pageable)
-                : List.of();
+        return itemRepository.findAllByNameOrDescriptionContaining(text, pageable);
     }
 
     @Override

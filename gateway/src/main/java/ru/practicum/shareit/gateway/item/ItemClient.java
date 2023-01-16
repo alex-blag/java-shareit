@@ -50,13 +50,13 @@ public class ItemClient extends BaseClient {
         return get("?from={from}&size={size}", userId, parameters);
     }
 
-    public ResponseEntity<Object> getAllByNameOrDescriptionContaining(long userId, int from, int size, String text) {
+    public ResponseEntity<Object> getAllByNameOrDescriptionContaining(String searchResource, long userId, int from, int size, String text) {
         Map<String, Object> parameters = Map.of(
                 "from", from,
                 "size", size,
                 "text", text
         );
-        return get("/search?from={from}&size={size}&text={text}", userId, parameters);
+        return get(searchResource + "?from={from}&size={size}&text={text}", userId, parameters);
     }
 
     public ResponseEntity<Object> postComment(long userId, long itemId, CommentPostDto commentPostDto) {

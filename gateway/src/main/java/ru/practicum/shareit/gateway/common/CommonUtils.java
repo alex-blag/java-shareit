@@ -14,6 +14,8 @@ public class CommonUtils {
 
     public static final String ITEMS_RESOURCE = "/items";
 
+    public static final String SEARCH_RESOURCE = "/search";
+
     public static final String BOOKINGS_RESOURCE = "/bookings";
 
     public static final String OWNER_RESOURCE = "/owner";

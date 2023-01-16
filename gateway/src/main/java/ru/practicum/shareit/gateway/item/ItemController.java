@@ -3,6 +3,7 @@ package ru.practicum.shareit.gateway.item;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
@@ -21,9 +22,11 @@ import ru.practicum.shareit.gateway.item.dto.ItemPostDto;
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
+import java.util.List;
 
 import static ru.practicum.shareit.gateway.common.CommonUtils.ITEMS_RESOURCE;
 import static ru.practicum.shareit.gateway.common.CommonUtils.MAX_SIZE;
+import static ru.practicum.shareit.gateway.common.CommonUtils.SEARCH_RESOURCE;
 import static ru.practicum.shareit.gateway.common.CommonUtils.X_SHARER_USER_ID;
 
 @Slf4j
@@ -77,7 +80,7 @@ public class ItemController {
         return itemClient.getAllByOwnerId(userId, from, size);
     }
 
-    @GetMapping("/search")
+    @GetMapping(SEARCH_RESOURCE)
     public ResponseEntity<Object> getAllByNameOrDescriptionContaining(
             @RequestHeader(X_SHARER_USER_ID) long userId,
             @RequestParam(defaultValue = "0") @PositiveOrZero int from,
@@ -91,7 +94,9 @@ public class ItemController {
                 text
         );
 
-        return itemClient.getAllByNameOrDescriptionContaining(userId, from, size, text);
+        return text.isBlank()
+                ? buildEmptyCollectionResponse()
+                : itemClient.getAllByNameOrDescriptionContaining(SEARCH_RESOURCE, userId, from, size, text);
     }
 
     @PostMapping("/{itemId}/comment")
@@ -103,6 +108,10 @@ public class ItemController {
         log.info("postComment(userId = {}, itemId = {}, {})", userId, itemId, commentPostDto);
 
         return itemClient.postComment(userId, itemId, commentPostDto);
+    }
+
+    private ResponseEntity<Object> buildEmptyCollectionResponse() {
+        return new ResponseEntity<>(List.of(), HttpStatus.OK);
     }
 
 }
